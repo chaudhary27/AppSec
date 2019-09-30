@@ -17,7 +17,7 @@ fuction check_word(string word, hashmap hashtable[])
 
 function load_dictionary(string dictionary, hashmap hashtable[])
 {
-    Initialize all values in hash table to NULL. [DONE]
+    Initialize all values in hash table to NULL. 
     Open dict_file from path stored in dictionary.
     If dict_file is NULL:
         return false.
@@ -48,8 +48,43 @@ function check_words(file fp, hashmap hashtable[], string misspelled[])
     Return num_misspelled.
 }
 
+
+
+check_word: 
+- takes in a word
+- looks it up in hashtable
+- if exits: true
+- if doesn't: false
+
+check_words:
+- calls check_word
+- takes in a pointer to file
+- loop through file, collect each words from lines
+- remove any punctuation surrounding the word
+- and remove period
+- leave any puncutation within the word
+- E-mail (hyphen needs to stay)
+- then call check_word and lookup in hashtable within check word function
+- if true: move on
+- false: store in misspelled array
+- return num_misspelled;
+
+* getline to read from the dict
+
+
+hashmap is a structure
+- linked list
+- two components
+    - data node
+    - next node --> pointer to next node
+- if there is one node, next node is NULL 
+
+
+
+
+
 checking single word entries (0.0/2.0)
-Test Failed: [Errno 2] No such file or directory: './a.out': './a.out'
+
 checking for non-English word. (0.0/1.0)
 
 checking longer strings (0.0/2.0)

@@ -5,65 +5,62 @@
 #include <ctype.h>
 #include "dictionary.h"
 
-#define DICTIONARY "wordlist.txt"
-#define TESTDICT "test_wordlist.txt"
+// Code skeleton adapted from https://github.com/bahalperin/spell-checker/blob/master/dictionary.c
 
 bool check_word(const char *word, hashmap_t hashtable[])
 {
-    // Get the lower case representation of the word to compare against.
-    char *lower_case_word = (char *)malloc((strlen(word) + 1) * sizeof(char));
-    for (int i = 0; i < strlen(word) + 1; i++)
+    
+    int word_length = strlen(word);
+    char lower_word[LENGTH+1];
+
+    // Convert word to lowercase
+    for (int i = 0; i < word_length; i++)
     {
-        lower_case_word[i] = tolower(word[i]);
-    }
-
-    // Get the hash_value to identify the location in the hashmap.
-    int hash_value = hash_function(lower_case_word);
-    hashmap_t hash_value_entry = hashtable[hash_value];
-
-    // Check the values in the hashmap at the index location.
-    do
-    {
-        char *word_at_location = hash_value_entry->word;
-
-        // We could potentially just use strcmp() here, but to
-        // be on the safe side we use strcasecmp to leave case
-        // out of the equation>
-        if (strcasecmp(word, word_at_location) == 0)
+        // If character is uppercase, make it lowercase.
+        if(isupper(word[i]))
         {
-            free(lower_case_word);
+            lower_word[i] = tolower(word[i]) ;
+        }
+        // Otherwise it's already lowercase or it's not a letter.
+        else
+        {
+            lower_word[i] = word[i];
+        }
+    }
+    // Add null character to end of char array... not sure why this is needed?
+    lower_word[word_length] = '\0';
+
+    int bucket = hash_function(word);
+
+    hashmap_t cursor = hashtable[bucket];
+
+    while(cursor != NULL){
+        if(strcmp(word, cursor->word) == 0){
             return true;
         }
-
-        // check the next node
-        hash_value_entry = hash_value_entry->next;
-
-        // Repeat the loop until we no longer have nodes in the linked list
-    } while (hash_value_entry->word);
-
-    // allocated memory is let go of
-    free(lower_case_word);
-
-    // If we don't specifically check out as a correctly spelled
-    // word, we return false
+        else if(strcmp(tolower(word), cursor->word) == 0){
+            return true;
+        }
+        cursor = cursor->next;
+    }
     return false;
 }
 
-int num_words = 0;
+
 
 bool load_dictionary(const char *dictionary_file, hashmap_t hashtable[]) 
-{
-
+{ 
+    // Initialize all values in hash table to NULL
     for (int i = 0; i < HASH_SIZE; i++)
     {
         hashtable[i] = NULL;
     }
-    // file pointer for the dictionary file.
-    FILE *dict_file = fopen(dictionary_file, "r");
+    // Open dict_file from path stored in dictionary.
+    FILE* dict_file = fopen(dictionary_file, "r");
 
     if (dict_file == NULL)
     {
-        printf("Couldn't open file or file does not exists.");
+        printf("no such file...");
         return false;
     }
 
@@ -73,6 +70,7 @@ bool load_dictionary(const char *dictionary_file, hashmap_t hashtable[])
     while (fscanf(dict_file, "%s", buffer) > 0)
     {
         hashmap_t new_node = malloc(sizeof(node));
+
         new_node->next = NULL;
         strcpy(new_node->word, buffer);
         bucket = hash_function(new_node->word);
@@ -86,9 +84,30 @@ bool load_dictionary(const char *dictionary_file, hashmap_t hashtable[])
             new_node->next = hashtable[bucket];
             hashtable[bucket] = new_node;
         }
-        num_words++;
+
     }
     fclose(dict_file);
     return true;
 };
 
+
+int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
+{
+    int num_misspelled = 0;
+
+    // While line in fp is not EOF (end of file):
+    while (fscanf(fp, "%s", buffer) > 0)
+    {
+
+
+    }
+        Read the line.
+        Split the line on spaces.
+        For each word in line:
+            Remove punctuation from beginning and end of word.
+            If not check_word(word):
+                Append word to misspelled.
+                Increment num_misspelled.
+                
+    return num_misspelled;
+};

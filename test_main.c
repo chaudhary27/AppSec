@@ -1,6 +1,9 @@
-#include <check.h>
+// #include <check.h>
 #include "dictionary.h"
 #include <stdlib.h>
+#include "spell.c"
+#include <stdbool.h>
+
 
 #define DICTIONARY "wordlist.txt"
 #define TESTDICT "test_worlist.txt"
@@ -63,8 +66,7 @@ check_word_suite(void)
     return suite;
 }
 
-int
-main(void)
+int main(void)
 {
     int failed;
     Suite *suite;

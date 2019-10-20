@@ -8,13 +8,13 @@ Code skeleton adapted from https://github.com/bahalperin/spell-checker/blob/mast
 #include <string.h>
 #include <ctype.h>
 #include "dictionary.h"
-#include "dictionary.c"
+// #include "dictionary.c"
 
 
-int main ()
-{
-    return 0;
-}
+// int main ()
+// {
+//     return 0;
+// }
 
 bool check_word(const char *word, hashmap_t hashtable[])
 {

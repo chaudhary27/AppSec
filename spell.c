@@ -10,6 +10,12 @@ Code skeleton adapted from https://github.com/bahalperin/spell-checker/blob/mast
 #include "dictionary.h"
 #include "dictionary.c"
 
+
+int main ()
+{
+    return 0;
+}
+
 bool check_word(const char *word, hashmap_t hashtable[])
 {
     //Allocate memory for lowercase_word

@@ -1,8 +1,14 @@
 language: c
-before install:
-  - sudo apt-get update
-  - sudo apt-get -y check
-compiler: gcc
+dist: bionic
+
+compiler:
+  - gcc
+  
+before_install:
+  - sudo apt update
+
+install:
+  - make get-deps
+
 script:
   - make
-  - make test

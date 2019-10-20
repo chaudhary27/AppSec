@@ -24,6 +24,7 @@ function load_dictionary(string dictionary, hashmap hashtable[])
     While word in dict_file is not EOF (end of file):
         Set hashmap_t new_node to a new node.
         Set new_node->next to NULL.
+        
         Set new_node->word equal to word.
         Set int bucket to hash_function(word).
         if hashtable[bucket] is NULL:
@@ -70,7 +71,6 @@ check_words:
 - return num_misspelled;
 
 * getline to read from the dict
-
 
 hashmap is a structure
 - linked list

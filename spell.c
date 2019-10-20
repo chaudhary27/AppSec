@@ -1,3 +1,7 @@
+/*
+Code skeleton adapted from https://github.com/bahalperin/spell-checker/blob/master/dictionary.c
+
+*/
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,109 +9,150 @@
 #include <ctype.h>
 #include "dictionary.h"
 
-// Code skeleton adapted from https://github.com/bahalperin/spell-checker/blob/master/dictionary.c
-
 bool check_word(const char *word, hashmap_t hashtable[])
 {
-    
-    int word_length = strlen(word);
-    char lower_word[LENGTH+1];
+    //Allocate memory for lowercase_word
+    char *lowercase_word = (char *)malloc((strlen(word) + 1) * sizeof(char));
 
-    // Convert word to lowercase
-    for (int i = 0; i < word_length; i++)
+    for (int i = 0; i < strlen(word) + 1; i++)
     {
-        // If character is uppercase, make it lowercase.
-        if(isupper(word[i]))
-        {
-            lower_word[i] = tolower(word[i]) ;
-        }
-        // Otherwise it's already lowercase or it's not a letter.
-        else
-        {
-            lower_word[i] = word[i];
-        }
+        lowercase_word[i] = tolower(word[i]);
     }
-    // Add null character to end of char array... not sure why this is needed?
-    lower_word[word_length] = '\0';
 
-    int bucket = hash_function(word);
-
+    int bucket = hash_function(lowercase_word);
     hashmap_t cursor = hashtable[bucket];
 
-    while(cursor != NULL){
-        if(strcmp(word, cursor->word) == 0){
+    do
+    {
+        char *ptr = cursor->word;
+
+        if (strcasecmp(word, ptr) == 0)
+        {
+            free(lowercase_word);
             return true;
         }
-        else if(strcmp(tolower(word), cursor->word) == 0){
-            return true;
-        }
+
         cursor = cursor->next;
-    }
+
+    } while (cursor->word);
+
+    free(lowercase_word);
     return false;
 }
 
+int check_words(FILE *fp, hashmap_t hashtable[], char *misspelled[])
+{
+    bool long_word = false;
+    int num_mispelled = 0;
+    int i = 0;
+    char word[LENGTH];
 
-
-bool load_dictionary(const char *dictionary_file, hashmap_t hashtable[]) 
-{ 
-    // Initialize all values in hash table to NULL
-    for (int i = 0; i < HASH_SIZE; i++)
+    while (fscanf(fp, "%45s", word) == 1)
     {
-        hashtable[i] = NULL;
+        int word_len = strlen(word);
+        if (word_len == 45)
+        {
+            char ch = fgetc(fp);
+            ungetc(ch, fp);
+            if (!isspace(ch))
+            {
+                long_word = true;
+                continue;
+            }
+        }
+
+        if (long_word && word_len < LENGTH)
+        {
+            long_word = false;
+            num_mispelled++;
+            misspelled[i] = (char *)malloc(strlen(word));
+            strcpy(misspelled[i++], word);
+            continue;
+        }
+
+        char lst_ch = word[word_len - 1];
+        if (ispunct(lst_ch))
+        {
+            word[word_len - 1] = '\0';
+        }
+
+        if (ispunct(word[0]))
+        {
+            memmove(word, word + 1, strlen(word) - 1);
+        }
+
+        if (!check_word(word, hashtable))
+        {
+            num_mispelled++;
+            misspelled[i] = malloc(strlen(word) + 1);
+            strcpy(misspelled[i++], word);
+        }
     }
-    // Open dict_file from path stored in dictionary.
-    FILE* dict_file = fopen(dictionary_file, "r");
+    return num_mispelled;
+}
+
+static bool add_hashmap(int bucket, char *word, hashmap_t hashtable[])
+{
+    hashmap_t new_node = malloc(sizeof(*new_node));
+    strcpy(new_node->word, word);
+
+    hashmap_t hash = hashtable[bucket];
+    char *ptr = hash->word;
+
+    if (ptr != NULL)
+    {
+        new_node->next = hash;
+    }
+    else
+    {
+        new_node->next = NULL;
+    }
+
+    hashtable[bucket] = new_node;
+    return true;
+}
+
+bool load_dictionary(const char *dictionary_file, hashmap_t hashtable[])
+{
+    int bucket;
+    bool word_add;
+    char word[LENGTH];
+   
+    // Open the dictionary file
+    FILE *dict_file = fopen(dictionary_file, "r");
 
     if (dict_file == NULL)
     {
-        printf("no such file...");
         return false;
     }
 
-    int bucket;
-    char buffer[LENGTH + 1];
-
-    while (fscanf(dict_file, "%s", buffer) > 0)
+    while (fscanf(dict_file, "%45s", word) == 1)
     {
-        hashmap_t new_node = malloc(sizeof(node));
+        //Allocate memory for lowercase_word
+        char *lowercase_word = (char *)malloc((strlen(word) + 1) * sizeof(char));
 
-        new_node->next = NULL;
-        strcpy(new_node->word, buffer);
-        bucket = hash_function(new_node->word);
-
-        if (hashtable[bucket] == NULL)
+        if (lowercase_word == NULL)
         {
-            hashtable[bucket] = new_node;
-        }
-        else
-        {
-            new_node->next = hashtable[bucket];
-            hashtable[bucket] = new_node;
+            return false;
         }
 
+        // Convert word to lowercase to accurately compare to hash table.
+        for (int i = 0; i < (strlen(word) + 1); i++)
+        {
+            lowercase_word[i] = tolower(word[i]);
+        }
+
+        bucket = hash_function(lowercase_word);
+        word_add = add_hashmap(bucket, lowercase_word, hashtable);
+
+        if (!word_add)
+        {
+            return false;
+        }
+
+        free(lowercase_word);
     }
+
     fclose(dict_file);
     return true;
-};
-
-
-int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
-{
-    int num_misspelled = 0;
-
-    // While line in fp is not EOF (end of file):
-    while (fscanf(fp, "%s", buffer) > 0)
-    {
-
-
-    }
-        Read the line.
-        Split the line on spaces.
-        For each word in line:
-            Remove punctuation from beginning and end of word.
-            If not check_word(word):
-                Append word to misspelled.
-                Increment num_misspelled.
-                
-    return num_misspelled;
-};
+}

@@ -7,9 +7,6 @@ get-deps:
 dictionary.o: dictionary.c
 	gcc -Wall -c dictionary.c dictionary.h
 
-spell_check: clean prog
-	./spell_check
-
 spell.o: spell.c
 	gcc -Wall -c spell.c
 
@@ -17,7 +14,7 @@ test.o: test_main.c
 	gcc -Wall -c test_main.c
 
 main.o: main.c
-	gcc -Wall -c -g main.c
+	gcc -Wall -c main.c
 
 test: dictionary.o spell.o test_main.o
 	gcc -Wall -o test_main test_main.o spell.o dictionary.o -lcheck -lm -lrt -lpthread -lsubunit
